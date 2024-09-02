@@ -1,0 +1,5 @@
+erpnext.raviyax.site {
+    tls fbdahhjv@gmail.com
+
+    reverse_proxy erpnext-nginx:8080
+}
