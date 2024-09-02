@@ -110,8 +110,8 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
-    ports:
-      - "8080:8080"
+    networks:
+      - erpnext
 
   queue-long:
     image: frappe/erpnext:v15.19.1
@@ -191,6 +191,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    networks:
+      - erpnext
     
 
 volumes:
@@ -199,3 +201,7 @@ volumes:
   redis-cache-data:
   sites:
   logs:
+
+networks:
+  erpnext:
+    driver: bridge
