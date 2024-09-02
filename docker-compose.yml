@@ -9,6 +9,8 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext
 
   configurator:
     image: frappe/erpnext:v15.19.1
@@ -18,16 +20,15 @@ services:
     entrypoint:
       - bash
       - -c
-    # add redis_socketio for backward compatibility
     command:
       - >
         ls -1 apps > sites/apps.txt;
-        bench set-config -g db_host $$DB_HOST;
-        bench set-config -gp db_port $$DB_PORT;
-        bench set-config -g redis_cache "redis://$$REDIS_CACHE";
-        bench set-config -g redis_queue "redis://$$REDIS_QUEUE";
-        bench set-config -g redis_socketio "redis://$$REDIS_QUEUE";
-        bench set-config -gp socketio_port $$SOCKETIO_PORT;
+        bench set-config -g db_host ${DB_HOST};
+        bench set-config -gp db_port ${DB_PORT};
+        bench set-config -g redis_cache "redis://${REDIS_CACHE}";
+        bench set-config -g redis_queue "redis://${REDIS_QUEUE}";
+        bench set-config -g redis_socketio "redis://${REDIS_QUEUE}";
+        bench set-config -gp socketio_port ${SOCKETIO_PORT};
     environment:
       DB_HOST: db
       DB_PORT: "3306"
@@ -37,6 +38,8 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext
 
   create-site:
     image: frappe/erpnext:v15.19.1
@@ -68,13 +71,15 @@ services:
         done;
         echo "sites/common_site_config.json found";
         bench new-site --no-mariadb-socket --admin-password=admin --db-root-password=admin --install-app erpnext --set-default frontend;
+    networks:
+      - erpnext
 
   db:
     image: mariadb:10.6
     healthcheck:
-      test: mysqladmin ping -h localhost --password=admin
-      interval: 1s
-      retries: 15
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password=admin"]
+      interval: 10s
+      retries: 3
     deploy:
       restart_policy:
         condition: on-failure
@@ -87,6 +92,8 @@ services:
       MYSQL_ROOT_PASSWORD: admin
     volumes:
       - db-data:/var/lib/mysql
+    networks:
+      - erpnext
 
   frontend:
     container_name: erpnext-nginx
@@ -126,6 +133,8 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext
 
   queue-short:
     image: frappe/erpnext:v15.19.1
@@ -140,6 +149,8 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext
 
   redis-queue:
     image: redis:6.2-alpine
@@ -148,6 +159,8 @@ services:
         condition: on-failure
     volumes:
       - redis-queue-data:/data
+    networks:
+      - erpnext
 
   redis-cache:
     image: redis:6.2-alpine
@@ -156,6 +169,8 @@ services:
         condition: on-failure
     volumes:
       - redis-cache-data:/data
+    networks:
+      - erpnext
 
   scheduler:
     image: frappe/erpnext:v15.19.1
@@ -168,6 +183,8 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext
 
   websocket:
     image: frappe/erpnext:v15.19.1
@@ -180,6 +197,8 @@ services:
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
+    networks:
+      - erpnext
 
   caddy:
     image: caddy:latest
@@ -193,7 +212,6 @@ services:
       - "443:443"
     networks:
       - erpnext
-    
 
 volumes:
   db-data:
