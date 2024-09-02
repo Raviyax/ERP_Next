@@ -180,9 +180,21 @@ services:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
 
+  caddy:
+    image: caddy:2.7
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./Caddyfile:/etc/caddy/Caddyfile
+
 volumes:
   db-data:
   redis-queue-data:
   redis-cache-data:
   sites:
   logs:
+  caddy_data:
+  caddy_config:
