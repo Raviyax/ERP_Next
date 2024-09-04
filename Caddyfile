@@ -1,4 +1,4 @@
-erpnext.raviyax.site {
+danujayaerp.duckdns.org {
 
     tls sdgsd@gmail.com
     reverse_proxy frontend:8080
